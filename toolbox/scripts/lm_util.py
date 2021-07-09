@@ -1964,6 +1964,28 @@ def call_circuitscape(cspath, outConfigFile):
     return mem_flag
 
 
+def call_julia(jl_soft, jl_file):
+    mem_flag = False
+    gprint('     Calling Circuitscape-5 from Julia:')
+    proc = subprocess.Popen([jl_soft, jl_file],
+                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                            shell=True)
+    while True:
+        line = proc.stdout.readline().decode()
+        if not line:
+            break
+        x = line.rstrip()
+        gprint("     " + x)  # 29
+
+    return mem_flag
+
+
+def create_julia_file(jl_file_path, ini_file_path):
+    with open(jl_file_path, 'w') as julia_file:
+        julia_file.write("using Circuitscape\n")
+        julia_file.write('compute' + '("' + ini_file_path + '")')
+
+
 def rename_fields(FC):
     try:
         arcpy.AddField_management(FC, "cw_to_Euc_Dist_Ratio", "FLOAT")
