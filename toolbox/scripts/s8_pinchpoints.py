@@ -208,6 +208,8 @@ def STEP8_calc_pinchpoints():
                                                     + 0.0)))
                 outCon.save(corePairRaster)
 
+                gprint(cfg.JULIA_PATH)
+                gprint(str(cfg.USE_CS5))
                 cs_version = 5
                 if cs_version == 4:
                     resFN = 'resistances_link_' + linkId + '.npy'
@@ -630,14 +632,6 @@ def import_npy_to_ras(npyFile,baseRaster,outRasterPath):
 
 
 def import_asc_to_ras(in_ascii, out_raster):
-    # descData = arcpy.Describe(baseraster)
-    # cellSize = descData.meanCellHeight
-    # extent = descData.Extent
-    # spatialReference = descData.spatialReference
-    #
-    # pnt = arcpy.Point(extent.XMin, extent.YMin)
-    # newRaster = arcpy.NumPyArrayToRaster(npyArray, pnt,
-    #                                      cellSize, cellSize, -9999)
     arcpy.ASCIIToRaster_conversion(in_ascii, out_raster, "FLOAT")
 
 

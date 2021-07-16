@@ -1158,6 +1158,7 @@ def create_log_file(param_keys, param_values):
                     "Parameter", digits=col_width))
         lfile.write("{:<{digits}} -----\n".format(
                     "---------", digits=col_width))
+        gprint(str(param_values))
         for inpt, param in zip(param_keys, param_values[1:]):
             lfile.write("{:<{digits}} {}\n".format(
                         inpt.upper(), param, digits=col_width))
@@ -1975,7 +1976,10 @@ def call_julia(jl_soft, jl_file):
         if not line:
             break
         x = line.rstrip()
-        gprint("     " + x)  # 29
+        gprint("     " + x)  # 29slice number
+        # Exception for circuitescape  not installed in Julia
+        # Exception for memoryflag
+        #
 
     return mem_flag
 
@@ -2201,7 +2205,6 @@ def snooze(sleepTime):
         time.sleep(1)
         # Dummy operations to give user ability to cancel:
         installD = arcpy.GetInstallInfo("desktop")
-
 
 
 def exit_with_geoproc_error(filename):
