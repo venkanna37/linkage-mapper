@@ -208,9 +208,14 @@ def STEP8_calc_pinchpoints():
                                                     + 0.0)))
                 outCon.save(corePairRaster)
 
-                gprint(cfg.JULIA_PATH)
-                gprint(str(cfg.USE_CS5))
-                cs_version = 5
+                if cfg.USE_CS5:
+                    cs_version = 5
+                else:
+                    cs_version = 4
+
+                # Currently, Circuitescape4 is using .npy files and Circuitscape5 is using
+                # .asc files as inputs. Npy file format can not be used in CS5 and some
+                # research has to be done whether using ASCII files in CS4 helpful.
                 if cs_version == 4:
                     resFN = 'resistances_link_' + linkId + '.npy'
                     resFile = path.join(INCIRCUITDIR, resFN)
@@ -237,6 +242,8 @@ def STEP8_calc_pinchpoints():
                     currentFN = ('Circuitscape_link' + linkId
                                  + '_cum_curmap.asc')
 
+                # This memory warning raise based on the CS4. Number of resistance nodes
+                # can process by CS5 has to confirm and write the warning.
                 totMem, availMem = lu.get_mem()
                 if numResistanceNodes / availMem > 2000000:
                     lu.dashline(1)
@@ -274,19 +281,19 @@ def STEP8_calc_pinchpoints():
                 if cs_version == 4:
                     lu.call_circuitscape(cfg.CSPATH, outConfigFile)
                 elif cs_version == 5:
-                    julia_soft = "C:/Program Files/Julia-1.6.1/bin/julia.exe"
+                    julia_soft = cfg.JULIA_PATH  # "C:/Program Files/Julia-1.6.1/bin/julia.exe"
                     julia_filename = "test.jl"
                     julia_file = path.join(cfg.CIRCUITBASEDIR, julia_filename)
-                    outConfigFile = outConfigFile.replace("\\", "\\\\")
+                    outConfigFile = outConfigFile.replace("\\", "\\\\")  # fix-me
                     lu.create_julia_file(julia_file, outConfigFile)
                     lu.call_julia(julia_soft, julia_file)
 
                 currentMap = path.join(OUTCIRCUITDIR, currentFN)
 
-                if not arcpy.Exists(currentMap):  # why do we have to run again
+                if not arcpy.Exists(currentMap):  # why do we have to run again? CS?
                     print_failure(numResistanceNodes, memFlag, 10)
                     numElements, numNodes = export_ras_to_npy(
-                                                resClipRasterMasked, resNpyFile) # has to change for linkage mapper
+                                                resClipRasterMasked, resNpyFile)
                     memFlag = lu.call_circuitscape(cfg.CSPATH, outConfigFile)
 
                     currentFN = ('Circuitscape_link' + linkId
@@ -307,7 +314,7 @@ def STEP8_calc_pinchpoints():
                 elif cs_version == 5:
                     import_asc_to_ras(currentMap, currentRaster)
 
-                if cfg.WRITE_VOLT_MAPS == True:
+                if cfg.WRITE_VOLT_MAPS == True:  # write for CS5?
                     voltFN = ('Circuitscape_link' + linkId + '_voltmap_'
                            + str(corex) + '_'+str(corey) + '.npy')
                     voltMap = path.join(OUTCIRCUITDIR, voltFN)
@@ -593,6 +600,7 @@ def export_ras_to_npy(raster,npyFile):
     return numElements, numNodes
 
 
+# This function has tp modify
 def export_ras_to_asc(raster, AscFile):
     descData = arcpy.Describe(raster)
     cellSize = descData.meanCellHeight
