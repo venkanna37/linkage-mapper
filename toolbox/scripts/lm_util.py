@@ -1977,9 +1977,6 @@ def call_julia(jl_soft, jl_file):
             break
         x = line.rstrip()
         gprint("     " + x)  # 29slice number
-        # Exception for circuitescape  not installed in Julia
-        # Exception for memoryflag
-        #
 
     return mem_flag
 

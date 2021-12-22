@@ -130,6 +130,11 @@ def STEP8_calc_pinchpoints():
             outRas.save(squaredRaster)
             resRaster = squaredRaster
 
+        if cfg.USE_CS5:
+            cs_version = 5
+        else:
+            cs_version = 4
+
         if cfg.DO_ADJACENTPAIRS:
             linkLoop = 0
             lu.dashline(1)
@@ -208,11 +213,6 @@ def STEP8_calc_pinchpoints():
                                                     + 0.0)))
                 outCon.save(corePairRaster)
 
-                if cfg.USE_CS5:
-                    cs_version = 5
-                else:
-                    cs_version = 4
-
                 # Currently, Circuitescape4 is using .npy files and Circuitscape5 is using
                 # .asc files as inputs. Npy file format can not be used in CS5 and some
                 # research has to be done whether using ASCII files in CS4 helpful.
@@ -277,20 +277,19 @@ def STEP8_calc_pinchpoints():
                 gprint('Processing link ID #' + str(linkId) + '. Resistance map'
                         ' has ' + str(int(numResistanceNodes)) + ' nodes.')
 
-                #  -------------Testing Circuitscpe-5 -------------------
                 if cs_version == 4:
                     lu.call_circuitscape(cfg.CSPATH, outConfigFile)
                 elif cs_version == 5:
-                    julia_soft = cfg.JULIA_PATH  # "C:/Program Files/Julia-1.6.1/bin/julia.exe"
+                    julia_soft = cfg.JULIA_PATH
                     julia_filename = "test.jl"
                     julia_file = path.join(cfg.CIRCUITBASEDIR, julia_filename)
-                    outConfigFile = outConfigFile.replace("\\", "\\\\")  # fix-me
+                    outConfigFile = outConfigFile.replace("\\", "\\\\")
                     lu.create_julia_file(julia_file, outConfigFile)
                     lu.call_julia(julia_soft, julia_file)
 
                 currentMap = path.join(OUTCIRCUITDIR, currentFN)
 
-                if not arcpy.Exists(currentMap):  # why do we have to run again? CS?
+                if not arcpy.Exists(currentMap):
                     print_failure(numResistanceNodes, memFlag, 10)
                     numElements, numNodes = export_ras_to_npy(
                                                 resClipRasterMasked, resNpyFile)
@@ -314,7 +313,7 @@ def STEP8_calc_pinchpoints():
                 elif cs_version == 5:
                     import_asc_to_ras(currentMap, currentRaster)
 
-                if cfg.WRITE_VOLT_MAPS == True:  # write for CS5?
+                if cfg.WRITE_VOLT_MAPS == True:
                     voltFN = ('Circuitscape_link' + linkId + '_voltmap_'
                            + str(corex) + '_'+str(corey) + '.npy')
                     voltMap = path.join(OUTCIRCUITDIR, voltFN)
@@ -511,16 +510,15 @@ def STEP8_calc_pinchpoints():
         gprint('and ending the cs_run.exe process.')
         lu.dashline(0)
 
-        gprint("\n\n\n Testing Circuitscpe-5 \n\n\n")
-        cs_version = 5
         if cs_version == 4:
             lu.call_circuitscape(cfg.CSPATH, outConfigFile)
         elif cs_version == 5:
-            julia_soft = "C:/Program Files/Julia-1.6.1/bin/julia.exe"
+            julia_soft = cfg.JULIA_PATH
             julia_filename = "test.jl"
             julia_file = path.join(cfg.CIRCUITBASEDIR, julia_filename)
+            outConfigFile = outConfigFile.replace("\\", "\\\\")
             lu.create_julia_file(julia_file, outConfigFile)
-            lu.call_circuitscape5(julia_soft, julia_file)
+            lu.call_julia(julia_soft, julia_file)
 
         if options['scenario']=='pairwise':
             rasterSuffix =  "_current_allPairs_" + cutoffText
